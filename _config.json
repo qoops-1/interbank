@@ -1,0 +1,11 @@
+{
+  "me": "0x50f550d0bbce84fa67232c33f821e202be35112f",
+  "datadir": "/path/to/ethereum/datadir",
+  "filePath": "/path/to/original/file.doc",
+  "destination": "http://akbars.ru/kyc.encrypted",
+  "receivers": [
+    {
+      "pub": "046e82cc542556f782b19b72a081396d4d3854217ddc1d08ee5112bbf7867e5904a456b5ed0041a9648230a395c6a25c9c0964c3687228a5b6b8721e967abb5664"
+    }
+  ]
+}
