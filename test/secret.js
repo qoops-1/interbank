@@ -35,6 +35,15 @@ describe("secret", () => {
                 assert.equal(jwk.kid, publicKey.address().toString("hex"));
             });
         });
+
+        describe(".fromJWK", () => {
+           it("builds Key", () => {
+               let jwk = privateKey.jwk();
+               let rebuilt = secret.Key.fromJWK(jwk);
+               assert(rebuilt instanceof secret.Key);
+               assert.deepEqual(privateKey.buffer(), rebuilt.buffer());
+           });
+        });
     });
 
     describe(".PublicKey", () => {
