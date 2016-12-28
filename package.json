@@ -12,6 +12,8 @@
     "commander": "^2.9.0",
     "elliptic": "^6.3.2",
     "keythereum": "^0.3.2",
+    "node-jose": "^0.9.1",
+    "ethereumjs-util": "*",
     "web3": "^0.16.0"
   },
   "devDependencies": {

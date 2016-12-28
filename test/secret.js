@@ -2,47 +2,73 @@
 
 const assert = require("assert"),
       secret = require("../lib/secret"),
-      crypto = require("crypto");
+      crypto = require("crypto"),
+      mocha  = require("mocha"),
+      jose   = require("node-jose");
+
+const describe = mocha.describe,
+      it       = mocha.it;
 
 describe("secret", () => {
-    describe(".digest", () => {
-        it("compute SHA256 hash", () => {
-            let output = Buffer.from("2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae", "hex");
-            assert.deepEqual(output, secret.digest("foo"));
-        });
-    });
+    let bytes = Buffer.from("0a3043ad9513ca10392687903506c6a716ddaaee3e76a675ad8952d3838367bf", "hex");
+    let privateKey = new secret.PrivateKey(bytes);
+    let publicKey = secret.derivePublicKey(privateKey);
 
     describe(".PrivateKey", () => {
-        it("contains buffer", () => {
-            let randomBytes = crypto.randomBytes(32);
-            let key = new secret.PrivateKey(randomBytes);
-            assert.deepEqual(randomBytes, key.buffer());
+        specify("#buffer", () => {
+            assert.deepEqual(bytes, privateKey.buffer());
         })
     });
 
     describe(".PublicKey", () => {
-        it("contains buffer", () => {
-            let randomBytes = crypto.randomBytes(32);
-            let key = new secret.PublicKey(randomBytes);
-            assert.deepEqual(randomBytes, key.buffer());
-        })
+        specify("#buffer()", () => {
+            assert(publicKey.buffer() instanceof Buffer)
+        });
+
+        describe("#point()", () => {
+            it("returns EC point", () => {
+                assert.notEqual(publicKey.point().x, null);
+                assert.notEqual(publicKey.point().y, null);
+            })
+        });
+
+        describe("#address()", () => {
+            it("return Ethereum address", () => {
+                let expected = Buffer.from("0b1ffdc070d46592bdcf8e7e7a470c8d34993baf", "hex");
+                assert.deepEqual(publicKey.address(), expected);
+            });
+        });
+
+        describe("#jwk()", () => {
+            it("return JWK representation", () => {
+                let jwk = publicKey.jwk();
+                assert.equal(jwk.kty, "EC");
+                assert.equal(jwk.crv, "secp256k1");
+                assert.equal(jwk.kid, publicKey.address().toString("hex"));
+            });
+        });
     });
 
     describe(".Key", () => {
-        let randomPrivateKey = new secret.PrivateKey(crypto.randomBytes(32));
-        let randomPublicKey = secret.derivePublicKey(randomPrivateKey);
-        let key = new secret.Key(randomPrivateKey, randomPublicKey);
+        let key = new secret.Key(privateKey, publicKey);
 
         describe("#private()", () => {
             it("return private key", () => {
-               assert.deepEqual(randomPrivateKey, key.private());
+               assert.deepEqual(key.private(), privateKey);
             });
         });
 
         describe("#public()", () => {
             it("return public key", () => {
-                assert.deepEqual(randomPublicKey, key.public());
+                assert.deepEqual(key.public(), publicKey);
             });
+        });
+    });
+
+    describe(".digest", () => {
+        it("compute SHA256 hash", () => {
+            let output = Buffer.from("2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae", "hex");
+            assert.deepEqual(secret.digest("foo"), output);
         });
     });
 });
