@@ -6,6 +6,8 @@ const assert = require("assert"),
       mocha  = require("mocha"),
       jose   = require("node-jose");
 
+const base64url = require("base64url");
+
 const describe = mocha.describe,
       it       = mocha.it;
 
@@ -60,6 +62,17 @@ describe("secret", () => {
                 assert.equal(jwk.kty, "EC");
                 assert.equal(jwk.crv, "secp256k1");
                 assert.equal(jwk.kid, publicKey.address().toString("hex"));
+            });
+        });
+
+        describe(".fromJWK()", () => {
+            it("builds PublicKey", () => {
+                let jwk = publicKey.jwk();
+                let rebuilt = secret.PublicKey.fromJWK(jwk);
+                assert(rebuilt instanceof secret.PublicKey);
+                assert.deepEqual(publicKey.buffer(), rebuilt.buffer());
+                assert.deepEqual(publicKey.point().x, rebuilt.point().x);
+                assert.deepEqual(publicKey.point().y, rebuilt.point().y);
             });
         });
     });
