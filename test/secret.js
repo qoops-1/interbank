@@ -24,6 +24,15 @@ describe("secret", () => {
                 assert.deepEqual(privateKey.public(), publicKey);
             });
         });
+
+        describe("#jwk()", () => {
+            it("return JWK representation", () => {
+                let jwk = privateKey.jwk();
+                assert.equal(jwk.kty, "EC");
+                assert.equal(jwk.crv, "secp256k1");
+                assert.equal(jwk.kid, publicKey.address().toString("hex"));
+            });
+        });
     });
 
     describe(".PublicKey", () => {
