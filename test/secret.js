@@ -11,13 +11,19 @@ const describe = mocha.describe,
 
 describe("secret", () => {
     let bytes = Buffer.from("0a3043ad9513ca10392687903506c6a716ddaaee3e76a675ad8952d3838367bf", "hex");
-    let privateKey = new secret.PrivateKey(bytes);
+    let privateKey = new secret.Key(bytes);
     let publicKey = secret.derivePublicKey(privateKey);
 
-    describe(".PrivateKey", () => {
+    describe(".Key", () => {
         specify("#buffer", () => {
             assert.deepEqual(bytes, privateKey.buffer());
-        })
+        });
+
+        describe("#public()", () => {
+            it("return public key", () => {
+                assert.deepEqual(privateKey.public(), publicKey);
+            });
+        });
     });
 
     describe(".PublicKey", () => {
@@ -45,22 +51,6 @@ describe("secret", () => {
                 assert.equal(jwk.kty, "EC");
                 assert.equal(jwk.crv, "secp256k1");
                 assert.equal(jwk.kid, publicKey.address().toString("hex"));
-            });
-        });
-    });
-
-    describe(".Key", () => {
-        let key = new secret.Key(privateKey, publicKey);
-
-        describe("#private()", () => {
-            it("return private key", () => {
-               assert.deepEqual(key.private(), privateKey);
-            });
-        });
-
-        describe("#public()", () => {
-            it("return public key", () => {
-                assert.deepEqual(key.public(), publicKey);
             });
         });
     });
