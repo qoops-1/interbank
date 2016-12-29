@@ -104,6 +104,12 @@ describe("secret", () => {
             let jwkKey = jwk.keys[0];
             assert.deepEqual(publicKey.jwk(), jwkKey);
         });
+
+        specify(".fromJWK()", () => {
+            let keySet = new secret.KeySet();
+            let rebuilt = secret.KeySet.fromJWK(keySet.jwk());
+            assert.deepEqual(keySet, rebuilt);
+        });
     });
 
     describe(".digest", () => {
