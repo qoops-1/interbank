@@ -86,6 +86,26 @@ describe("secret", () => {
         });
     });
 
+    describe(".KeySet", () => {
+        it("stores public keys", () => {
+            let keySet = new secret.KeySet();
+            keySet.add(publicKey);
+            let keys = keySet.keys();
+            assert(keys instanceof Array);
+            assert.equal(publicKey, keys[0]);
+        });
+
+        specify("#jwk()", () => {
+            let keySet = new secret.KeySet();
+            keySet.add(publicKey);
+            let jwk = keySet.jwk();
+            assert(jwk.keys instanceof Array);
+            assert.equal(1, jwk.keys.length);
+            let jwkKey = jwk.keys[0];
+            assert.deepEqual(publicKey.jwk(), jwkKey);
+        });
+    });
+
     describe(".digest", () => {
         it("compute SHA256 hash", () => {
             let output = Buffer.from("2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae", "hex");
