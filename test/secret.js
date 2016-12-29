@@ -3,8 +3,7 @@
 const assert = require("assert"),
       secret = require("../lib/secret"),
       crypto = require("crypto"),
-      mocha  = require("mocha"),
-      jose   = require("node-jose");
+      mocha  = require("mocha");
 
 const base64url = require("base64url");
 

@@ -15,7 +15,6 @@
     "ethereumjs-util": "*",
     "keythereum": "^0.3.2",
     "lodash": "^4.17.3",
-    "node-jose": "^0.9.1",
     "web3": "^0.16.0"
   },
   "devDependencies": {
