@@ -21,7 +21,8 @@ const readPublicKey = function (filePath) {
 const readKeySet = function (keySetFilePath) {
     let keySet = new secret.KeySet();
     try {
-        keySet = JSON.parse(fs.readFileSync(keySetFilePath))
+        let jwk = JSON.parse(fs.readFileSync(keySetFilePath))
+        keySet = secret.KeySet.fromJWK(jwk);
     } catch (e) {
         // Do Nothing
     }
