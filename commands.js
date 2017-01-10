@@ -3,7 +3,7 @@
 const commander     = require("commander"),
       fs            = require("fs");
 
-const addCommand    = require("./commands/add"),
+const importCommand    = require("./commands/import"),
       setupCommand  = require("./commands/setup"),
       exportCommand = require("./commands/export");
 
@@ -19,9 +19,9 @@ module.exports = function (args) {
         .description("Set configuration")
         .action(setupCommand);
 
-    parser.command("add <path_to_jwk>")
-        .description("Add JWK key of a recipient")
-        .action(addCommand);
+    parser.command("import <path_to_jwk>")
+        .description("Import public key of a recipient")
+        .action(importCommand);
 
     parser.command("export <password> <filepath>")
         .description("Export own public key")
