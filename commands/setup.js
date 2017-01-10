@@ -18,8 +18,7 @@ module.exports = function () {
         console.log("Please, type your Masterchain account below");
         prompt.get("account", (err, result) => {
            if (err) throw err;
-           let account = result.account;
-           config.account = account;
+           config.account = result.account;
            config.datadir = datadir;
            configuration.write(config);
            console.log("Thanks. This is your configuration file:");
