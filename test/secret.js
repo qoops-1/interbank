@@ -86,11 +86,22 @@ describe("secret", () => {
     });
 
     describe(".KeySet", () => {
-        it("stores public keys", () => {
+        it("store public keys", () => {
             let keySet = new secret.KeySet();
             keySet.add(publicKey);
             let keys = keySet.keys();
             assert(keys instanceof Array);
+            assert.equal(publicKey, keys[0]);
+        });
+
+        specify("deduplicate keys", () => {
+            let keySet = new secret.KeySet();
+            keySet.add(publicKey);
+            keySet.add(publicKey);
+
+            let keys = keySet.keys();
+            assert(keys instanceof Array);
+            assert.equal(1, keys.length);
             assert.equal(publicKey, keys[0]);
         });
 
