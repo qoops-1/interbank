@@ -1,9 +1,9 @@
 "use strict";
 
-const fs = require("fs");
+const fs        = require("fs");
 
-const configuration = require("../lib/configuration"),
-      secret = require("../lib/secret");
+const secret    = require("../lib/secret"),
+      keys      = require("../lib/keys");
 
 /**
  * @param {string} filePath
@@ -14,36 +14,9 @@ const readPublicKey = function (filePath) {
     return secret.PublicKey.fromJWK(jwk);
 };
 
-/**
- * @param {string} keySetFilePath
- * @return {KeySet}
- */
-const readKeySet = function (keySetFilePath) {
-    let keySet = new secret.KeySet();
-    try {
-        let jwk = JSON.parse(fs.readFileSync(keySetFilePath))
-        keySet = secret.KeySet.fromJWK(jwk);
-    } catch (e) {
-        // Do Nothing
-    }
-    return keySet;
-};
-
-/**
- * @param {KeySet} keySet
- * @param {string} keySetFilePath
- */
-const writeKeySet = function (keySet, keySetFilePath) {
-    let jwk = keySet.jwk();
-    let jwkString = JSON.stringify(jwk);
-    fs.writeFileSync(keySetFilePath, jwkString);
-};
-
 module.exports = function (filePath) {
-    let keySetFilePath = configuration.keySetFilePath;
-
     let publicKey = readPublicKey(filePath);
-    let keySet = readKeySet(keySetFilePath);
+    let keySet = keys.readKeySet();
     keySet.add(publicKey);
-    writeKeySet(keySet, keySetFilePath)
+    keys.writeKeySet(keySet);
 };
