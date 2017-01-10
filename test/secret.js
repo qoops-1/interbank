@@ -130,12 +130,26 @@ describe("secret", () => {
     });
 
     describe(".encrypt, .decrypt", () => {
-        it("can be decrypted", () => {
+        let password = "p4$$w0rd";
+
+        it("can be decrypted by String password", () => {
            let source = "Lorem ipsum dolor sit amet, consectetur adipiscing elit";
-           let password = "p4$$w0rd";
            let encrypted = secret.encrypt(source, password);
            let decrypted = secret.decrypt(encrypted, password);
            assert.equal(source, decrypted);
+        });
+
+        it("can be decrypted by Buffer password", () => {
+            let source = "Lorem ipsum dolor sit amet, consectetur adipiscing elit";
+            let passwordBuffer = Buffer.from(password);
+
+            let encrypted = secret.encrypt(source, password);
+            let encryptedB = secret.encrypt(source, passwordBuffer);
+            assert.deepEqual(encrypted, encryptedB);
+
+            let decrypted = secret.decrypt(encrypted, passwordBuffer);
+            let decryptedB = secret.decrypt(encryptedB, password);
+            assert.deepEqual(decrypted, decryptedB);
         });
     });
 
