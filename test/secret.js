@@ -138,4 +138,16 @@ describe("secret", () => {
            assert.equal(source, decrypted);
         });
     });
+
+    describe(".ecdhSecret", () => {
+        it("compute ECDH shared secret", () => {
+            let otherPrivateKeyBytes = secret.randomBytes(32);
+            let otherPrivateKey = new secret.Key(otherPrivateKeyBytes);
+            let otherPublicKey = otherPrivateKey.public();
+
+            let aSecret = secret.ecdhSecret(privateKey, otherPublicKey);
+            let bSecret = secret.ecdhSecret(otherPrivateKey, publicKey);
+            assert.deepEqual(aSecret, bSecret);
+        });
+    });
 });
