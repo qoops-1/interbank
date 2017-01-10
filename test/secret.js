@@ -117,4 +117,14 @@ describe("secret", () => {
             assert.deepEqual(secret.digest("foo"), output);
         });
     });
+
+    describe(".encrypt, .decrypt", () => {
+        it("can be decrypted", () => {
+           let source = "Lorem ipsum dolor sit amet, consectetur adipiscing elit";
+           let password = "p4$$w0rd";
+           let encrypted = secret.encrypt(source, password);
+           let decrypted = secret.decrypt(encrypted, password);
+           assert.equal(source, decrypted);
+        });
+    });
 });
