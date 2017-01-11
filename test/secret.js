@@ -115,6 +115,21 @@ describe("secret", () => {
             assert.deepEqual(publicKey.jwk(), jwkKey);
         });
 
+        describe("#byAddress", () => {
+            let keySet = new secret.KeySet();
+            keySet.add(publicKey);
+            specify("find PublicKey by Buffer address", () => {
+                let found = keySet.byAddress(publicKey.address());
+                assert.equal(found, publicKey);
+            });
+
+            specify("find PublicKey by hex address", () => {
+                let addressString = "0x" + publicKey.address().toString("hex");
+                let found = keySet.byAddress(addressString);
+                assert.equal(found, publicKey);
+            });
+        });
+
         specify(".fromJWK()", () => {
             let keySet = new secret.KeySet();
             let rebuilt = secret.KeySet.fromJWK(keySet.jwk());
