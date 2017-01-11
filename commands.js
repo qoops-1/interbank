@@ -6,8 +6,8 @@ const commander         = require("commander"),
 const setupCommand      = require("./commands/setup"),
       importCommand     = require("./commands/import"),
       exportCommand     = require("./commands/export"),
-      uploadCommand     = require("./commands/upload"),
-      downloadCommand   = require("./commands/download");
+      uploadCommand     = require("./commands/upload2"),
+      downloadCommand   = require("./commands/download2");
 
 const PACKAGE = "./package.json";
 
@@ -29,12 +29,12 @@ module.exports = function (args) {
         .description("Export own JWK public key")
         .action(exportCommand);
 
-    parser.command("upload <private_key_password> <file>")
+    parser.command("upload <password> <file>")
         .option("-N, --network [network]", "ethereum network, dev by default")
         .description("Upload KYC card")
         .action(uploadCommand);
 
-    parser.command("download <private_key_password> <path_or_folder>")
+    parser.command("download <password> <path_or_folder>")
         .option("-a, --address [address]", "address of the document originator")
         .option("-N, --network [network]", "ethereum network, dev by default")
         .description("Download KYC card")
