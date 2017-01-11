@@ -10,6 +10,7 @@ const secret        = require("../lib/secret"),
 
 module.exports = function (keyPassword, filePath, options) {
     let network = options.network || "dev";
+    let address = options.address;
     let config = configuration.read();
     let account = config.account;
 
@@ -21,7 +22,7 @@ module.exports = function (keyPassword, filePath, options) {
             return secret.ecdhSecret(key, publicKey);
         });
 
-        client.download(account, (error, document) => {
+        client.download(address, (error, document) => {
             fs.writeFileSync(filePath, document);
         });
     });
