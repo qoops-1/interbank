@@ -21,6 +21,15 @@ module.exports = function (keyPassword, filePath, options) {
            return secret.ecdhSecret(key, publicKey);
         });
         let contents = fs.readFileSync(filePath);
-        client.upload(contents);
+        client.upload(contents, (error, checksum, txid, descriptorUrl) => {
+            if (error) {
+                throw error;
+            } else {
+                console.log(`Updated KYC card for ${this.account}`);
+                console.log(`Checksum: ${"0x" + checksum.toString("hex")}`);
+                console.log(`Txid: ${txid}`);
+                console.log(`Descriptor address: ${descriptorUrl}`);
+            }
+        });
     });
 };

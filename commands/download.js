@@ -21,7 +21,7 @@ module.exports = function (keyPassword, filePath, options) {
             return secret.ecdhSecret(key, publicKey);
         });
 
-        client.download(account, document => {
+        client.download(account, (error, document) => {
             fs.writeFileSync(filePath, document);
         });
     });
