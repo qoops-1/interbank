@@ -2,7 +2,8 @@
 
 const fs            = require("fs"),
       base64url     = require("base64url"),
-      Web3          = require("web3");
+      Web3          = require("web3"),
+      _             = require("lodash");
 
 const secret        = require("../lib/secret"),
       storage       = require("../lib/storage"),
@@ -13,52 +14,67 @@ const secret        = require("../lib/secret"),
 
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 
-const prepareDescriptor = function (key, documentAddress, checksum, password) {
-    let row = checksum + ":" + password;
-    let keySet = keys.readKeySet();
+const ROW_REGEX = new RegExp(`([\\w-_]+)${literals.SEPARATOR_ESCAPED}([\\w-_]+)`);
 
-    let handlers = keySet.keys().map(publicKey => {
-        let sharedSecret = secret.ecdhSecret(key, publicKey);
-        let encryptedRow = secret.encrypt(row, sharedSecret);
-        return base64url.encode(encryptedRow);
-    });
-
-    return {
-        path: documentAddress,
-        handlers: handlers
+const decodeRow = function (handlerString, sharedSecret) {
+    try {
+        let decoded = base64url.toBuffer(handlerString);
+        let decrypted = secret.decrypt(decoded, sharedSecret).toString();
+        let match = ROW_REGEX.exec(decrypted);
+        return {
+            checksum: base64url.toBuffer(match[1]),
+            password: base64url.toBuffer(match[2])
+        }
+    } catch (e) {
+        // Do Nothing
     }
 };
 
+const bzzrSwarmHash = function (path) {
+    let regexp = /bzzr:\/\/(.+)/g;
+    return regexp.exec(path)[1];
+};
+
 module.exports = function (keyPassword, filePath, options) {
-    keys.readKey(keyPassword, key => {
-        let swarm = new storage.Swarm();
-        let documentPassword = secret.randomBytes(10);
+    let address = options.address;
+    let network = options.network || "dev";
+    let deployment = literals[network];
+    let config = configuration.read();
+    let account = config.account;
 
-        let contents = fs.readFileSync(filePath);
-        let encryptedContent = secret.encrypt(contents, documentPassword);
+    let swarm = new storage.Swarm();
+    let kycStorage = new contract.KycStorage(account, web3, deployment);
 
-        swarm.upload(encryptedContent, swarmHash => {
-            let documentAddress = "bzzr://" + swarmHash;
-            let checksum = secret.digest(contents);
-            let descriptor = prepareDescriptor(key, documentAddress, checksum, documentPassword);
-            let descriptorString = JSON.stringify(descriptor);
-            swarm.upload(descriptorString, descriptorHash => {
-                let network = options.network || "dev";
-                let deployment = literals[network];
-                let config = configuration.read();
-                let account = config.account;
-                let kycStorage = new contract.KycStorage(account, web3, deployment);
-                let hexDescriptorHash = "0x" + descriptorHash;
-                let hexChecksum = "0x" + checksum.toString("hex");
-                kycStorage.add(hexDescriptorHash, hexChecksum, (error, txid) => {
-                    if (error) {
-                        throw error;
-                    } else {
-                        console.log(`Updated doc for ${account}: checksum ${hexChecksum}`);
-                        console.log(`Txid: ${txid}`);
-                        console.log(`Document address: bzzr://${descriptorHash}`);
-                    }
-                });
+    kycStorage.read(address, hexSwarmHash => {
+        let swarmHash = hexSwarmHash.replace("0x", "");
+        swarm.download(swarmHash, descriptorString => {
+            let descriptor = JSON.parse(descriptorString);
+            let path = descriptor.path;
+            let handlers = descriptor.handlers;
+
+            keys.readKey(keyPassword, key => {
+               let keySet = keys.readKeySet();
+               let otherPublicKey = keySet.byAddress(address);
+               if (otherPublicKey) {
+                   let sharedSecret = secret.ecdhSecret(key, otherPublicKey);
+                   let correctHandler = _.find(handlers, handler => {
+                       return decodeRow(handler, sharedSecret);
+                   });
+                   let swarmHash = bzzrSwarmHash(path);
+                   let decodedRow = decodeRow(correctHandler, sharedSecret);
+                   swarm.download(swarmHash, content => {
+                       let password = decodedRow.password;
+                       let decrypted = secret.decrypt(content, password);
+                       let checksum = secret.digest(decrypted);
+                       if (_.isEqual(checksum, decodedRow.checksum)) {
+                           fs.writeFileSync(filePath, decrypted);
+                       } else {
+                           console.log("Wrong checksum");
+                       }
+                   });
+               } else {
+                   console.log(`Can not find an entry by ${address}`)
+               }
             });
         });
     });
