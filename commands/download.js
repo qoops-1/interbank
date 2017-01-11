@@ -13,12 +13,8 @@ const secret        = require("../lib/secret"),
 
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 
-const encodeRow = function (checksum, password) {
-    return base64url.encode(checksum) + literals.SEPARATOR + base64url.encode(password);
-};
-
 const prepareDescriptor = function (key, documentAddress, checksum, password) {
-    let row = encodeRow(checksum, password);
+    let row = checksum + ":" + password;
     let keySet = keys.readKeySet();
 
     let handlers = keySet.keys().map(publicKey => {
