@@ -6,8 +6,8 @@ const commander         = require("commander"),
 const setupCommand      = require("./commands/setup"),
       importCommand     = require("./commands/import"),
       exportCommand     = require("./commands/export"),
-      uploadCommand     = require("./commands/upload2"),
-      downloadCommand   = require("./commands/download2");
+      uploadCommand     = require("./commands/upload"),
+      downloadCommand   = require("./commands/download");
 
 const PACKAGE = "./package.json";
 
