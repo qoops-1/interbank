@@ -1,7 +1,8 @@
 "use strict";
 
 const commander         = require("commander"),
-      fs                = require("fs");
+      fs                = require("fs"),
+      path              = require("path");
 
 const setupCommand      = require("./commands/setup"),
       importCommand     = require("./commands/import"),
@@ -9,10 +10,10 @@ const setupCommand      = require("./commands/setup"),
       uploadCommand     = require("./commands/upload"),
       downloadCommand   = require("./commands/download");
 
-const PACKAGE = "./package.json";
-
 module.exports = function (args) {
-    let packageDescription = JSON.parse(fs.readFileSync(PACKAGE));
+    const PACKAGE_PATH = path.resolve(path.join(__dirname, "package.json"));
+
+    let packageDescription = JSON.parse(fs.readFileSync(PACKAGE_PATH));
     let version = `${packageDescription.name} v${packageDescription.version}`;
     let parser = commander
         .version(version, null);
