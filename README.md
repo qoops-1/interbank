@@ -31,11 +31,11 @@
 
 Для загрузки файла KYC анкеты следует выполнить
 
-    $ interbank upload p4$$w0rd /path/to/kyc.pdf
+    $ interbank upload p4$$w0rd /path/to/kyc.pdf --network mc
     
 Для выгрузки KYC анкеты контрагента с адресом `0xdeadbeaf`:
 
-    $ interbank download p4$$w0rd /path/to/deadbeaf_kyc.pdf --address 0xdeadbeaf
+    $ interbank download p4$$w0rd /path/to/deadbeaf_kyc.pdf --address 0xdeadbeaf --network mc
     
 Пароль `p4$$w0rd` необходим здесь, так как происходит восстановление приватного ключа из его зишафрованной
 паролем формы.
