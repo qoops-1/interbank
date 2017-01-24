@@ -17,7 +17,7 @@ const contract = require("../lib/contract"),
 const PACKAGE_PATH = path.resolve(path.join(__dirname, "../package.json"));
 const PACKAGE = JSON.parse(fs.readFileSync(PACKAGE_PATH));
 
-const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+const web3 = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddress()));
 
 const parseArgs = function (args) {
     let result = {};

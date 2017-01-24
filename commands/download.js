@@ -14,7 +14,7 @@ module.exports = function (keyPassword, filePath, options) {
     let config = configuration.read();
     let account = config.account;
 
-    let web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+    let web3 = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddress()));
 
     keys.readKey(keyPassword, key => {
         let keySet = keys.readKeySet();
