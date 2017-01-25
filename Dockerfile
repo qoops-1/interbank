@@ -6,4 +6,4 @@ WORKDIR /home/nodejs/app
 COPY . /home/nodejs/app
 RUN npm install --global --production .
 
-CMD ["node", "index.jss"]
+CMD ["node", "index.js"]
