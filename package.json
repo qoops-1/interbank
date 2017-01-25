@@ -13,9 +13,11 @@
   "license": "Apache-2.0",
   "dependencies": {
     "base64url": "^2.0.0",
+    "body-parser": "^1.16.0",
     "commander": "^2.9.0",
     "elliptic": "^6.3.2",
     "ethereumjs-util": "*",
+    "express": "^4.14.0",
     "homedir": "^0.6.0",
     "keythereum": "^0.3.2",
     "lodash": "^4.17.3",
