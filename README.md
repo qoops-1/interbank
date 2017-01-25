@@ -39,3 +39,8 @@
     
 Пароль `p4$$w0rd` необходим здесь, так как происходит восстановление приватного ключа из его зишафрованной
 паролем формы.
+
+## Docker
+
+    $ docker build .
+    $ docker run -v /path/to/datadir:/datadir -e "KEY_FILE_PATH=/datadir/keystore/UTC--2016-12-18T09-50-49.590391588Z--0434984cd3959c18d7e17ee3fc35a2a6249ca828" -e "ETH_NETWORK=mc" IMAGE

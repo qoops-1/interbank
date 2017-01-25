@@ -16,7 +16,7 @@
     "body-parser": "^1.16.0",
     "commander": "^2.9.0",
     "elliptic": "^6.3.2",
-    "ethereumjs-util": "*",
+    "ethereumjs-util": "^5.0.1",
     "ethereumjs-wallet": "^0.6.0",
     "express": "^4.14.0",
     "homedir": "^0.6.0",
