@@ -8,7 +8,8 @@ const fs                = require("fs"),
     Web3              = require("web3"),
     express = require("express"),
     bodyParser = require('body-parser'),
-    wallet = require('ethereumjs-wallet');
+    wallet = require('ethereumjs-wallet'),
+    multer = require("multer");
 
 const contract = require("./lib/contract"),
     configuration = require("./lib/configuration"),
@@ -18,18 +19,11 @@ const contract = require("./lib/contract"),
     secret = require("./lib/secret"),
     ops = require("./lib/ops");
 
-const PACKAGE_PATH = path.resolve(path.join(__dirname, "./package.json"));
-const PACKAGE = JSON.parse(fs.readFileSync(PACKAGE_PATH));
-
 const web3 = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddress()));
+const app = express();
+const upload = multer();
 
-
-let app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.text());
-
-
-app.post("/import", (req, res) => {
+app.post("/import", bodyParser.text(), (req, res) => {
     try {
         let keyString = req.body;
         ops.importOp(keyString);
@@ -45,15 +39,78 @@ app.get("/export", (req, res) => {
     let password = req.query.password;
 
     try {
-        let inputString = fs.readFileSync(path.resolve(keyFilePath));
-        console.log(JSON.parse(inputString));
-        console.log(password);
-        let key = wallet.fromV3(JSON.parse(inputString), password);
-        let privateKey = new secret.Key(key.getPrivateKey());
-        let jwk = privateKey.public().jwk();
-        res.status(200).json(jwk);
+        keys.readKeyFile(keyFilePath, password, key => {
+            let jwk = key.public().jwk();
+            res.status(200).json(jwk);
+        });
     } catch (err) {
         console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post("/upload", upload.single('file'), (req, res) => {
+    let keyFilePath = configuration.keyFilePath();
+    let network = configuration.network();
+    let account = configuration.account();
+
+    let password = req.body.password;
+    let file = req.file;
+
+    try {
+        keys.readKeyFile(keyFilePath, password, key => {
+            let keySet = keys.readKeySet();
+            let client = new kyc.Client(web3, network, account, keySet, publicKey => {
+                return secret.ecdhSecret(key, publicKey);
+            });
+
+            let contents = file.buffer;
+
+            client.upload(contents, (error, checksum, txid, descriptorUrl) => {
+                if (error) {
+                    res.status(500).json({ error: error.message });
+                } else {
+                    res.status(200).json({
+                        updated: account,
+                        checksum: "0x" + checksum.toString("hex"),
+                        txid: txid,
+                        descriptorUrl: descriptorUrl
+                    });
+                }
+            });
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get("/download", (req, res) => {
+    let keyFilePath = configuration.keyFilePath();
+    let network = configuration.network();
+    let account = configuration.account();
+
+    let password = req.query.password;
+    let address = req.query.address;
+
+    try {
+        keys.readKeyFile(keyFilePath, password, key => {
+            let keySet = keys.readKeySet();
+            let client = new kyc.Client(web3, network, account, keySet, publicKey => {
+                return secret.ecdhSecret(key, publicKey);
+            });
+
+            client.download(address, (error, document) => {
+                if (error) {
+                    res.status(500).json({ error: error.message });
+                } else {
+                    res.set('Content-Type', 'application/octet-stream');
+                    res.status(200).end(document);
+                }
+            });
+        });
+    } catch (err) {
+        console.log(err);
         res.status(500).json({ error: err.message });
     }
 });
