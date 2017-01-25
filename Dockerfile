@@ -6,4 +6,4 @@ WORKDIR /home/nodejs/app
 COPY . /home/nodejs/app
 RUN npm install --global --production .
 
-CMD ["interbank"]
+CMD ["node", "index.jss"]
