@@ -7,7 +7,8 @@ const fs                = require("fs"),
     commander         = require("commander"),
     Web3              = require("web3"),
     express = require("express"),
-    bodyParser = require('body-parser');
+    bodyParser = require('body-parser'),
+    wallet = require('ethereumjs-wallet');
 
 const contract = require("./lib/contract"),
     configuration = require("./lib/configuration"),
@@ -40,7 +41,21 @@ app.post("/import", (req, res) => {
 });
 
 app.get("/export", (req, res) => {
+    let keyFilePath = configuration.keyFilePath();
+    let password = req.query.password;
 
+    try {
+        let inputString = fs.readFileSync(path.resolve(keyFilePath));
+        console.log(JSON.parse(inputString));
+        console.log(password);
+        let key = wallet.fromV3(JSON.parse(inputString), password);
+        let privateKey = new secret.Key(key.getPrivateKey());
+        let jwk = privateKey.public().jwk();
+        res.status(200).json(jwk);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.listen(8080, function(_) {
