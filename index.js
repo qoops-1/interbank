@@ -34,6 +34,16 @@ app.post("/import", bodyParser.text(), (req, res) => {
     }
 });
 
+app.get("/list", (req, res) => {
+    try {
+        let keySet = keys.readKeySet();
+        res.status(200).json(keySet.jwk());
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get("/export", (req, res) => {
     let keyFilePath = configuration.keyFilePath();
     let password = req.query.password;
