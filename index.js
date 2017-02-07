@@ -23,6 +23,15 @@ const web3 = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddre
 const app = express();
 const upload = multer();
 
+if(process.env.NODE_ENV==='development'){
+  app.use((req, res, next)=>{
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+      res.header('Access-Control-Allow-Headers', 'Content-Type');
+      next();
+  });
+}
+
 app.post("/import", bodyParser.text(), (req, res) => {
     try {
         let keyString = req.body;
