@@ -23,12 +23,31 @@ const web3 = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddre
 const app = express();
 const upload = multer();
 
+if(process.env.NODE_ENV==='development'){
+  app.use((req, res, next)=>{
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+      res.header('Access-Control-Allow-Headers', 'Content-Type');
+      next();
+  });
+}
+
 app.post("/import", bodyParser.text(), (req, res) => {
     try {
         let keyString = req.body;
         ops.importOp(keyString);
         res.status(201).end();
     } catch(err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get("/list", (req, res) => {
+    try {
+        let keySet = keys.readKeySet();
+        res.status(200).json(keySet.jwk());
+    } catch (err) {
         console.error(err);
         res.status(500).json({ error: err.message });
     }
