@@ -10,7 +10,9 @@ const fs                = require("fs"),
     bodyParser = require('body-parser'),
     wallet = require('ethereumjs-wallet'),
     multer = require("multer"),
-    cors = require("cors");
+    cors = require("cors"),
+    http = require("http"),
+    socketIo = require("socket.io");
 
 const contract = require("./lib/contract"),
     configuration = require("./lib/configuration"),
@@ -22,6 +24,8 @@ const contract = require("./lib/contract"),
 
 const web3 = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddress()));
 const app = express();
+const server = http.Server(app);
+const io = socketIo(server);
 const upload = multer();
 
 require("./config/express")(app);
@@ -128,6 +132,6 @@ app.get("/download", (req, res) => {
     }
 });
 
-app.listen(8080, function(_) {
+server.listen(8080, function(_) {
     console.log("Waiting at http://localhost:8080/");
 });
