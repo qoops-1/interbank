@@ -24,8 +24,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddre
 const app = express();
 const upload = multer();
 
-let config = configuration.read();
-app.use(cors(config.cors));
+require("./config/express")(app);
 
 app.post("/import", bodyParser.text(), (req, res) => {
     try {
