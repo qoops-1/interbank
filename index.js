@@ -9,7 +9,8 @@ const fs                = require("fs"),
     express = require("express"),
     bodyParser = require('body-parser'),
     wallet = require('ethereumjs-wallet'),
-    multer = require("multer");
+    multer = require("multer"),
+    cors = require("cors");
 
 const contract = require("./lib/contract"),
     configuration = require("./lib/configuration"),
@@ -23,14 +24,8 @@ const web3 = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddre
 const app = express();
 const upload = multer();
 
-if(process.env.NODE_ENV==='development'){
-  app.use((req, res, next)=>{
-      res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-      res.header('Access-Control-Allow-Headers', 'Content-Type');
-      next();
-  });
-}
+let config = configuration.read();
+app.use(cors(config.cors));
 
 app.post("/import", bodyParser.text(), (req, res) => {
     try {
