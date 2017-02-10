@@ -2,29 +2,35 @@
 
 "use strict";
 
-const fs                = require("fs"),
-    path              = require("path"),
-    commander         = require("commander"),
-    Web3              = require("web3"),
-    express = require("express"),
+const fs       = require("fs"),
+    path       = require("path"),
+    commander  = require("commander"),
+    Web3       = require("web3"),
+    express    = require("express"),
     bodyParser = require('body-parser'),
-    wallet = require('ethereumjs-wallet'),
-    multer = require("multer"),
-    cors = require("cors");
+    wallet     = require('ethereumjs-wallet'),
+    multer     = require("multer"),
+    cors       = require("cors"),
+    http       = require("http"),
+    socketIo   = require("socket.io"),
+    async      = require("async");
 
-const contract = require("./lib/contract"),
+const contract    = require("./lib/contract"),
     configuration = require("./lib/configuration"),
-    literals = require("./lib/literals"),
-    keys = require("./lib/keys"),
-    kyc = require("./lib/kyc"),
-    secret = require("./lib/secret"),
-    ops = require("./lib/ops");
+    literals      = require("./lib/literals"),
+    keys          = require("./lib/keys"),
+    kyc           = require("./lib/kyc"),
+    secret        = require("./lib/secret"),
+    ops           = require("./lib/ops");
 
-const web3 = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddress()));
-const app = express();
+const web3   = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddress()));
+const app    = express();
+const server = http.Server(app);
+const io     = socketIo(server);
 const upload = multer();
 
 require("./config/express")(app);
+require("./config/socket")(io, app);
 
 app.post("/import", bodyParser.text(), (req, res) => {
     try {
@@ -66,36 +72,43 @@ app.post("/upload", upload.single('file'), (req, res) => {
     let keyFilePath = configuration.keyFilePath();
     let network = configuration.network();
     let account = configuration.account();
-
+    let keySet  = keys.readKeySet();
     let password = req.body.password;
     let file = req.file;
 
-    try {
-        keys.readKeyFile(keyFilePath, password, key => {
+    let endPoint = (error, checksum, txid, descriptorUrl, jwk) => {
+        console.log(error, checksum, txid, descriptorUrl);
+        if(error){
+            io.emit('kycCard:update:fail', {
+                message: error.message,
+                jwk: jwk
+            });            
+        } else {
+            let checksumHex = checksum.toString("hex");
+            io.emit('kycCard:update:done', {
+                jwk: jwk,             
+                checksum: `0x${checksumHex}`
+            });
+        }
+    }
+    async.waterfall([
+        (callback) => keys.readKeyFile(keyFilePath, password, key => callback(null, key)),
+      
+        (key, callback) => {
+            io.emit('kycCard:update:start', key.public().jwk());
             let keySet = keys.readKeySet();
             let client = new kyc.Client(web3, network, account, keySet, publicKey => {
                 return secret.ecdhSecret(key, publicKey);
             });
 
             let contents = file.buffer;
-
             client.upload(contents, (error, checksum, txid, descriptorUrl) => {
-                if (error) {
-                    res.status(500).json({ error: error.message });
-                } else {
-                    res.status(200).json({
-                        updated: account,
-                        checksum: "0x" + checksum.toString("hex"),
-                        txid: txid,
-                        descriptorUrl: descriptorUrl
-                    });
-                }
-            });
-        });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: err.message });
-    }
+                callback(error, checksum, txid, descriptorUrl, key.public().jwk())
+            })
+        }
+    ], endPoint);
+
+    res.status(200).json({ code: 200, isFileSyncStarted: true });
 });
 
 app.get("/download", (req, res) => {
@@ -128,6 +141,9 @@ app.get("/download", (req, res) => {
     }
 });
 
-app.listen(8080, function(_) {
+io.on('connection', (socket)=>{
+});
+
+server.listen(8080, function(_) {
     console.log("Waiting at http://localhost:8080/");
 });
