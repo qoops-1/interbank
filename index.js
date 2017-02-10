@@ -58,8 +58,7 @@ app.get("/export", (req, res) => {
     let password = req.query.password;
 
     try {
-        keys.readKey(keyFilePath, password, key => {
-            let jwk = key.public().jwk();
+        ops.exportOp(keyFilePath, password, jwk => {
             res.status(200).json(jwk);
         });
     } catch (err) {
