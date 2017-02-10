@@ -1,10 +1,10 @@
 "use strict";
 
-const fs        = require("fs");
+const fs    = require("fs");
 
-const ops = require("../lib/ops");
+const ops   = require("../lib/ops");
 
-module.exports = function (filePath) {
+module.exports = (filePath) => {
     let jsonString = JSON.parse(fs.readFileSync(filePath));
     ops.importOp(jsonString);
 };
