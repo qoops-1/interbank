@@ -9,6 +9,11 @@ const importCommand     = require("./commands/import"),
       uploadCommand     = require("./commands/upload"),
       downloadCommand   = require("./commands/download");
 
+/**
+ * Read package.json
+ *
+ * @returns {object}
+ */
 const readPackageDescription = () => {
     let packagePath = path.resolve(path.join(__dirname, "package.json"));
     return JSON.parse(fs.readFileSync(packagePath));
