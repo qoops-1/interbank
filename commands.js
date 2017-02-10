@@ -4,8 +4,7 @@ const commander         = require("commander"),
       fs                = require("fs"),
       path              = require("path");
 
-const setupCommand      = require("./commands/setup"),
-      importCommand     = require("./commands/import"),
+const importCommand     = require("./commands/import"),
       exportCommand     = require("./commands/export"),
       uploadCommand     = require("./commands/upload"),
       downloadCommand   = require("./commands/download");
@@ -17,10 +16,6 @@ module.exports = function (args) {
     let version = `${packageDescription.name} v${packageDescription.version}`;
     let parser = commander
         .version(version, null);
-
-    parser.command("setup")
-        .description("Set configuration")
-        .action(setupCommand);
 
     parser.command("import <file>")
         .description("Import JWK public key of a recipient")

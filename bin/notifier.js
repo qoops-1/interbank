@@ -38,14 +38,13 @@ const parseArgs = function (args) {
 };
 
 let args = parseArgs(process.argv);
-let config = configuration.read();
 
 let deployment = literals[args.network];
 let watching = args.address;
-let me = config.account;
 
 keys.readKey(args.keyFilePath, args.password, key => {
     let keySet = keys.readKeySet();
+    let me = key.public().address();
     let client = new kyc.Client(web3, args.network, me, keySet, publicKey => {
         return secret.ecdhSecret(key, publicKey);
     });
