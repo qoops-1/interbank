@@ -24,9 +24,10 @@ const parseArgs = function (args) {
 
     commander
         .version(PACKAGE.version)
-        .arguments("<password> <address>")
+        .arguments("<key> <password> <address>")
         .option("-N, --network [network]", "ethereum network, dev by default")
-        .action((password, address, options) => {
+        .action((keyFilePath, password, address, options) => {
+            result.keyFilePath = keyFilePath;
             result.password = password;
             result.network = options.network || "dev";
             result.address = address;
@@ -37,14 +38,13 @@ const parseArgs = function (args) {
 };
 
 let args = parseArgs(process.argv);
-let config = configuration.read();
 
 let deployment = literals[args.network];
 let watching = args.address;
-let me = config.account;
 
-keys.readKey(args.password, key => {
+keys.readKey(args.keyFilePath, args.password, key => {
     let keySet = keys.readKeySet();
+    let me = key.public().address();
     let client = new kyc.Client(web3, args.network, me, keySet, publicKey => {
         return secret.ecdhSecret(key, publicKey);
     });

@@ -58,8 +58,7 @@ app.get("/export", (req, res) => {
     let password = req.query.password;
 
     try {
-        keys.readKeyFile(keyFilePath, password, key => {
-            let jwk = key.public().jwk();
+        ops.exportOp(keyFilePath, password, jwk => {
             res.status(200).json(jwk);
         });
     } catch (err) {
@@ -69,46 +68,38 @@ app.get("/export", (req, res) => {
 });
 
 app.post("/upload", upload.single('file'), (req, res) => {
-    let keyFilePath = configuration.keyFilePath();
-    let network = configuration.network();
-    let account = configuration.account();
-    let keySet  = keys.readKeySet();
-    let password = req.body.password;
-    let file = req.file;
+  let keyFilePath = configuration.keyFilePath();
+  let network = configuration.network();
+  let password = req.body.password;
+  let file = req.file;
 
-    let endPoint = (error, checksum, txid, descriptorUrl, jwk) => {
-        console.log(error, checksum, txid, descriptorUrl);
-        if(error){
-            io.emit('kycCard:update:fail', {
-                message: error.message,
-                jwk: jwk
-            });            
-        } else {
-            let checksumHex = checksum.toString("hex");
-            io.emit('kycCard:update:done', {
-                jwk: jwk,             
-                checksum: `0x${checksumHex}`
-            });
-        }
+  let endPoint = (error, checksum, txid, descriptorUrl, jwk) => {
+    console.log(error, checksum, txid, descriptorUrl);
+    if(error){
+      io.emit('kycCard:update:fail', {
+        message: error.message,
+        jwk: jwk
+      });
+    } else {
+      let checksumHex = checksum.toString("hex");
+      io.emit('kycCard:update:done', {
+        jwk: jwk,
+        checksum: `0x${checksumHex}`
+      });
     }
-    async.waterfall([
-        (callback) => keys.readKeyFile(keyFilePath, password, key => callback(null, key)),
-      
-        (key, callback) => {
-            io.emit('kycCard:update:start', key.public().jwk());
-            let keySet = keys.readKeySet();
-            let client = new kyc.Client(web3, network, account, keySet, publicKey => {
-                return secret.ecdhSecret(key, publicKey);
-            });
+  }
+  async.waterfall([
+    (callback) => keys.readKeyFile(keyFilePath, password, key => callback(null, key)),
 
-            let contents = file.buffer;
-            client.upload(contents, (error, checksum, txid, descriptorUrl) => {
-                callback(error, checksum, txid, descriptorUrl, key.public().jwk())
-            })
-        }
-    ], endPoint);
+    (key, callback) => {
+      io.emit('kycCard:update:start', key.public().jwk());
 
-    res.status(200).json({ code: 200, isFileSyncStarted: true });
+      let contents = file.buffer
+      ops.uploadOp(web3, network, key, contents, callback)
+    }
+  ], endPoint);
+
+  res.status(200).json({ code: 200, isFileSyncStarted: true });
 });
 
 app.get("/download", (req, res) => {
@@ -120,7 +111,7 @@ app.get("/download", (req, res) => {
     let address = req.query.address;
 
     try {
-        keys.readKeyFile(keyFilePath, password, key => {
+        keys.readKey(keyFilePath, password, key => {
             let keySet = keys.readKeySet();
             let client = new kyc.Client(web3, network, account, keySet, publicKey => {
                 return secret.ecdhSecret(key, publicKey);

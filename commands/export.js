@@ -1,21 +1,19 @@
 "use strict";
 
-const fs            = require("fs"),
-      elliptic      = require("elliptic");
+const fs            = require("fs");
 
 const keys          = require("../lib/keys");
+const ops   = require("../lib/ops");
 
 /**
  * Export own public key as JWK to `filePath`.
- *
+ * @param {string} keyFilePath
  * @param {string} password
- * @param {string} filePath
+ * @param {string} jwkFilePath
  */
-module.exports = function (password, filePath) {
-    keys.readKey(password, key => {
-        let publicKey = key.public();
-        let jwk = publicKey.jwk();
+module.exports = function (keyFilePath, password, jwkFilePath) {
+    ops.exportOp(keyFilePath, password, jwk => {
         let jwkString = JSON.stringify(jwk);
-        fs.writeFileSync(filePath, jwkString);
+        fs.writeFileSync(jwkFilePath, jwkString);
     });
 };
