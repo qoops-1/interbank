@@ -3,6 +3,7 @@
 const fs            = require("fs");
 
 const keys          = require("../lib/keys");
+const ops   = require("../lib/ops");
 
 /**
  * Export own public key as JWK to `filePath`.
@@ -11,9 +12,7 @@ const keys          = require("../lib/keys");
  * @param {string} jwkFilePath
  */
 module.exports = function (keyFilePath, password, jwkFilePath) {
-    keys.readKey(keyFilePath, password, key => {
-        let publicKey = key.public();
-        let jwk = publicKey.jwk();
+    ops.exportOp(keyFilePath, password, jwk => {
         let jwkString = JSON.stringify(jwk);
         fs.writeFileSync(jwkFilePath, jwkString);
     });

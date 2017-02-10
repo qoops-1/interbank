@@ -9,10 +9,18 @@ const importCommand     = require("./commands/import"),
       uploadCommand     = require("./commands/upload"),
       downloadCommand   = require("./commands/download");
 
-module.exports = function (args) {
-    const PACKAGE_PATH = path.resolve(path.join(__dirname, "package.json"));
+/**
+ * Read package.json
+ *
+ * @returns {object}
+ */
+const readPackageDescription = () => {
+    let packagePath = path.resolve(path.join(__dirname, "package.json"));
+    return JSON.parse(fs.readFileSync(packagePath));
+};
 
-    let packageDescription = JSON.parse(fs.readFileSync(PACKAGE_PATH));
+module.exports = function (args) {
+    let packageDescription = readPackageDescription();
     let version = `${packageDescription.name} v${packageDescription.version}`;
     let parser = commander
         .version(version, null);
