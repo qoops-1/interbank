@@ -70,8 +70,6 @@ app.get("/export", (req, res) => {
 app.post("/upload", upload.single('file'), (req, res) => {
   let keyFilePath = configuration.keyFilePath();
   let network = configuration.network();
-  let account = configuration.account();
-  let keySet  = keys.readKeySet();
   let password = req.body.password;
   let file = req.file;
 
@@ -95,15 +93,9 @@ app.post("/upload", upload.single('file'), (req, res) => {
 
     (key, callback) => {
       io.emit('kycCard:update:start', key.public().jwk());
-      let keySet = keys.readKeySet();
-      let client = new kyc.Client(web3, network, account, keySet, publicKey => {
-        return secret.ecdhSecret(key, publicKey);
-      });
 
-      let contents = file.buffer;
-      client.upload(contents, (error, checksum, txid, descriptorUrl) => {
-        callback(error, checksum, txid, descriptorUrl, key.public().jwk())
-      })
+      let contents = file.buffer
+      ops.uploadOp(web3, network, key, contents, callback)
     }
   ], endPoint);
 
