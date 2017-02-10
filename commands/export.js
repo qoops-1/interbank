@@ -1,21 +1,24 @@
 "use strict";
 
 const fs            = require("fs"),
-      elliptic      = require("elliptic");
+      elliptic      = require("elliptic"),
+      wallet        = require("ethereumjs-wallet"),
+      path          = require("path");
 
-const keys          = require("../lib/keys");
+const secret        = require("../lib/secret");
 
 /**
  * Export own public key as JWK to `filePath`.
- *
+ * @param {string} keyFilePath
  * @param {string} password
- * @param {string} filePath
+ * @param {string} jwkFilePath
  */
-module.exports = function (password, filePath) {
-    keys.readKey(password, key => {
-        let publicKey = key.public();
-        let jwk = publicKey.jwk();
-        let jwkString = JSON.stringify(jwk);
-        fs.writeFileSync(filePath, jwkString);
-    });
+module.exports = function (keyFilePath, password, jwkFilePath) {
+    let keyString = fs.readFileSync(path.resolve(keyFilePath));
+    let ethKey = wallet.fromV3(JSON.parse(keyString), password);
+    let key = new secret.Key(ethKey.getPrivateKey());
+    let publicKey = key.public();
+    let jwk = publicKey.jwk();
+    let jwkString = JSON.stringify(jwk);
+    fs.writeFileSync(jwkFilePath, jwkString);
 };

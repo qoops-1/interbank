@@ -26,7 +26,7 @@ module.exports = function (args) {
         .description("Import JWK public key of a recipient")
         .action(importCommand);
 
-    parser.command("export <password> <file>")
+    parser.command("export <key> <password> <jwk>")
         .description("Export own JWK public key")
         .action(exportCommand);
 
