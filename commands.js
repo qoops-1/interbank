@@ -30,12 +30,12 @@ module.exports = function (args) {
         .description("Export own JWK public key")
         .action(exportCommand);
 
-    parser.command("upload <password> <file>")
+    parser.command("upload <key> <password> <file>")
         .option("-N, --network [network]", "ethereum network, dev by default")
         .description("Upload KYC card")
         .action(uploadCommand);
 
-    parser.command("download <password> <path_or_folder>")
+    parser.command("download <key> <password> <path_or_folder>")
         .option("-a, --address [address]", "address of the document originator")
         .option("-N, --network [network]", "ethereum network, dev by default")
         .description("Download KYC card")

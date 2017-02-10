@@ -8,7 +8,7 @@ const secret        = require("../lib/secret"),
       keys          = require("../lib/keys"),
       kyc           = require("../lib/kyc");
 
-module.exports = function (keyPassword, filePath, options) {
+module.exports = function (keyFilePath, keyPassword, filePath, options) {
     let network = options.network || "dev";
     let address = options.address;
     let config = configuration.read();
@@ -16,7 +16,7 @@ module.exports = function (keyPassword, filePath, options) {
 
     let web3 = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddress()));
 
-    keys.readKey(keyPassword, key => {
+    keys.readKeyFile(keyFilePath, keyPassword, key => {
         let keySet = keys.readKeySet();
         let client = new kyc.Client(web3, network, account, keySet, publicKey => {
             return secret.ecdhSecret(key, publicKey);
