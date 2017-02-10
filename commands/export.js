@@ -11,7 +11,7 @@ const keys          = require("../lib/keys");
  * @param {string} jwkFilePath
  */
 module.exports = function (keyFilePath, password, jwkFilePath) {
-    keys.readKeyFile(keyFilePath, password, key => {
+    keys.readKey(keyFilePath, password, key => {
         let publicKey = key.public();
         let jwk = publicKey.jwk();
         let jwkString = JSON.stringify(jwk);

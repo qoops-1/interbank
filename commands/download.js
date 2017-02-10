@@ -16,7 +16,7 @@ module.exports = function (keyFilePath, keyPassword, filePath, options) {
 
     let web3 = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddress()));
 
-    keys.readKeyFile(keyFilePath, keyPassword, key => {
+    keys.readKey(keyFilePath, keyPassword, key => {
         let keySet = keys.readKeySet();
         let client = new kyc.Client(web3, network, account, keySet, publicKey => {
             return secret.ecdhSecret(key, publicKey);

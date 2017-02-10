@@ -58,7 +58,7 @@ app.get("/export", (req, res) => {
     let password = req.query.password;
 
     try {
-        keys.readKeyFile(keyFilePath, password, key => {
+        keys.readKey(keyFilePath, password, key => {
             let jwk = key.public().jwk();
             res.status(200).json(jwk);
         });
@@ -77,7 +77,7 @@ app.post("/upload", upload.single('file'), (req, res) => {
     let file = req.file;
 
     try {
-        keys.readKeyFile(keyFilePath, password, key => {
+        keys.readKey(keyFilePath, password, key => {
             let keySet = keys.readKeySet();
             let client = new kyc.Client(web3, network, account, keySet, publicKey => {
                 return secret.ecdhSecret(key, publicKey);
@@ -113,7 +113,7 @@ app.get("/download", (req, res) => {
     let address = req.query.address;
 
     try {
-        keys.readKeyFile(keyFilePath, password, key => {
+        keys.readKey(keyFilePath, password, key => {
             let keySet = keys.readKeySet();
             let client = new kyc.Client(web3, network, account, keySet, publicKey => {
                 return secret.ecdhSecret(key, publicKey);
