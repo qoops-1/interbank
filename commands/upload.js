@@ -19,7 +19,7 @@ module.exports = function (keyFilePath, keyPassword, filePath, options) {
       if (error) {
         throw error
       } else {
-        console.log(`Updated KYC card for ${account}`)
+        console.log(`Updated KYC card for ${account.toString('hex')}`)
         console.log(`Checksum: ${"0x" + checksum.toString("hex")}`)
         console.log(`Txid: ${txid}`)
         console.log(`Descriptor address: ${descriptorUrl}`)
