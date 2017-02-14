@@ -89,7 +89,7 @@ app.post("/upload", upload.single('file'), (req, res) => {
     }
   }
   async.waterfall([
-    (callback) => keys.readKeyFile(keyFilePath, password, key => callback(null, key)),
+    (callback) => keys.readKey(keyFilePath, password, key => callback(null, key)),
 
     (key, callback) => {
       io.emit('kycCard:update:start', key.public().jwk());
