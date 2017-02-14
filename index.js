@@ -73,20 +73,13 @@ app.post("/upload", upload.single('file'), (req, res) => {
   let password = req.body.password;
   let file = req.file;
 
-  let endPoint = (error, checksum, txid, descriptorUrl, jwk) => {
-    console.log(error, checksum, txid, descriptorUrl);
-    if(error){
-      io.emit('kycCard:update:fail', {
-        message: error.message,
-        jwk: jwk
-      });
-    } else {
-      let checksumHex = checksum.toString("hex");
-      io.emit('kycCard:update:done', {
-        jwk: jwk,
-        checksum: `0x${checksumHex}`
-      });
-    }
+  let endPoint = (checksum, descriptorUrl, jwk) => {
+    console.log(checksum, descriptorUrl);
+    let checksumHex = checksum.toString("hex");
+    io.emit('kycCard:update:done', {
+      jwk: jwk,
+      checksum: `0x${checksumHex}`
+    });
   }
   async.waterfall([
     (callback) => keys.readKey(keyFilePath, password, key => callback(null, key)),
