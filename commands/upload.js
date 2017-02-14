@@ -15,10 +15,15 @@ module.exports = function (keyFilePath, keyPassword, filePath, options) {
   keys.readKey(keyFilePath, keyPassword, key => {
     let contents = fs.readFileSync(filePath)
     let account = key.public().address()
-    ops.uploadOp(web3, network, key, contents, (checksum, descriptorUrl) => {
-      console.log(`Updated KYC card for ${account}`)
-      console.log(`Checksum: ${"0x" + checksum.toString("hex")}`)
-      console.log(`Descriptor address: ${descriptorUrl}`)
+    ops.uploadOp(web3, network, key, contents, (error, checksum, txid, descriptorUrl) => {
+      if (error) {
+        throw error
+      } else {
+        console.log(`Updated KYC card for ${account}`)
+        console.log(`Checksum: ${"0x" + checksum.toString("hex")}`)
+        console.log(`Txid: ${txid}`)
+        console.log(`Descriptor address: ${descriptorUrl}`)
+      }
     })
   })
 }
