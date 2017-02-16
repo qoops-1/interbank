@@ -17,13 +17,14 @@ web3.personal.unlockAccount(from, password, 1000);
 const contents = fs.readFileSync("contracts/KycStorage.sol", "utf-8");
 let compiled = web3.eth.compile.solidity(contents);
 
+let kyc = compiled["<stdin>:KycStorage"];
 console.log("~~~~~");
-console.log(JSON.stringify(compiled.KycStorage.info.abiDefinition));
+console.log(JSON.stringify(kyc.info.abiDefinition));
 console.log("~~~~~");
 
-let contract = web3.eth.contract(compiled.KycStorage.info.abiDefinition);
+let contract = web3.eth.contract(kyc.info.abiDefinition);
 
-contract.new(null, {from: from, data: compiled.KycStorage.code, gas: 1000000}, function (e, contract) {
+contract.new(null, {from: from, data: kyc.code, gas: 1000000}, function (e, contract) {
     if (e) throw e;
 
     if(!contract.address) {
