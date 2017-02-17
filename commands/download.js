@@ -9,7 +9,7 @@ const secret        = require("../lib/secret"),
       kyc           = require("../lib/kyc");
 
 module.exports = function (keyFilePath, keyPassword, filePath, options) {
-    let network = options.network || "dev";
+    let network = options.network || configuration.network();
     let address = options.address;
 
     let web3 = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddress()));

@@ -8,7 +8,7 @@ const configuration = require("../lib/configuration"),
       ops          = require("../lib/ops");
 
 module.exports = function (keyFilePath, keyPassword, filePath, options) {
-  let network = options.network || "dev";
+  let network = options.network || configuration.network();
 
   let web3 = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddress()));
 
