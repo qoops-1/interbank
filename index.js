@@ -122,7 +122,7 @@ app.get("/download", (req, res) => {
                     res.status(500).json({ error: error.message });
                 } else {
                     res.set('Content-Type', 'application/octet-stream');
-                    res.status(200).end(document);
+                    res.status(200).end(document, 'binary');
                 }
             });
         });
