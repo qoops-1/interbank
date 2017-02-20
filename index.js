@@ -127,15 +127,8 @@ app.get("/download", (req, res) => {
             let client = new kyc.Client(web3, network, account, keySet, publicKey => {
                 return secret.ecdhSecret(key, publicKey);
             });
-
-            client.download(address, (error, document) => {
-                if (error) {
-                    res.status(500).json({ error: error.message });
-                } else {
-                    res.set('Content-Type', 'application/octet-stream');
-                    res.status(200).end(document, 'binary');
-                }
-            });
+            res.set('Content-Type', 'application/octet-stream');
+            client.downloadStream(address).pipe(res);
         });
     } catch (err) {
         console.log(err);
