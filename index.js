@@ -43,6 +43,17 @@ app.post("/import", bodyParser.text(), (req, res) => {
     }
 });
 
+app.post("/remove", bodyParser.text(), (req, res) => {
+  try {
+    let keyString = req.body;
+    ops.removeOp(keyString);
+    res.status(201).end();
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+})
+
 app.get("/list", (req, res) => {
     try {
         let keySet = keys.readKeySet();
