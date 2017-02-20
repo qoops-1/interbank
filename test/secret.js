@@ -94,6 +94,16 @@ describe("secret", () => {
             assert.equal(publicKey, keys[0]);
         });
 
+        it("store public keys", () => {
+            let keySet = new secret.KeySet()
+            keySet.add(publicKey)
+            keySet.remove(publicKey)
+            let keys = keySet.keys();
+            assert(keys instanceof Array);
+            assert.equal(0, keys.length);
+
+        });
+
         specify("deduplicate keys", () => {
             let keySet = new secret.KeySet();
             keySet.add(publicKey);
