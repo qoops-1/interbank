@@ -43,10 +43,10 @@ app.post("/import", bodyParser.text(), (req, res) => {
     }
 });
 
-app.post("/remove", bodyParser.text(), (req, res) => {
+app.get("/remove", (req, res) => {
   try {
-    let keyString = req.body;
-    ops.removeOp(keyString);
+    let kid = req.query.kid;
+    ops.removeOp(kid);
     res.status(201).end();
   } catch(err) {
     console.error(err);
