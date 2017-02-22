@@ -33,49 +33,46 @@ require("./config/express")(app);
 require("./config/socket")(io, app);
 
 app.post("/import", bodyParser.text(), (req, res) => {
-  try {
-    let keyString = req.body;
-    ops.importOp(keyString);
-    res.status(201).end();
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
+  ops.importOpAsync(req.body)
+    .then( 
+      () => res.status(201).end() 
+    )
+    .catch(
+      err => res.status(500).json({ error: err.message }) 
+    );
 });
 
 app.get("/remove", (req, res) => {
-  try {
-    let kid = req.query.kid;
-    ops.removeOp(kid);
-    res.status(201).end();
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
+  ops.removeOpAsync(req.query.kid)
+    .then(
+      () => res.status(201).end() 
+    )
+    .catch(
+      err => res.status(500).json({ error: err.message })
+    );
 })
 
 app.get("/list", (req, res) => {
-  try {
-    let keySet = keys.readKeySet();
-    res.status(200).json(keySet.jwk());
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
+  keys.readKeySetAsync()
+    .then(
+      keySet => res.status(200).json(keySet.jwk()) 
+    )
+    .catch(
+      err => res.status(500).json({ error: err.message })
+    )
 });
 
 app.get("/export", (req, res) => {
   let keyFilePath = configuration.keyFilePath();
   let password = req.query.password;
 
-  try {
-    ops.exportOp(keyFilePath, password, jwk => {
-      res.status(200).json(jwk);
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
+  ops.exportOpAsync(keyFilePath, password)
+    .then(
+      jwk => res.status(200).json(jwk) 
+    )
+    .catch(
+      err => res.status(500).json({ error: err.message })
+    );
 });
 
 app.post("/upload", upload.single('file'), (req, res) => {
