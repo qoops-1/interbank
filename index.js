@@ -129,6 +129,12 @@ app.get("/download", (req, res) => {
   }
 });
 
+app.post("/signin", (req, res)=>{
+  res.status(200).json({
+    jwk: "jwk"
+  })
+});
+
 io.on('connection', (socket) => {
 });
 
