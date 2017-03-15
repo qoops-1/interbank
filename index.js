@@ -12,6 +12,8 @@ const fs = require("fs"),
   multer = require("multer"),
   cors = require("cors"),
   http = require("http"),
+  crypto = require("crypto"),
+  jsonwebtoken = require("jsonwebtoken"),
   socketIo = require("socket.io"),
   async = require("async");
 
@@ -21,7 +23,9 @@ const contract = require("./lib/contract"),
   keys = require("./lib/keys"),
   kyc = require("./lib/kyc"),
   secret = require("./lib/secret"),
-  ops = require("./lib/ops");
+  ops = require("./lib/ops"),
+  env = require("./config/env"),
+  redis = require("./config/redis");
 
 const web3 = new Web3(new Web3.providers.HttpProvider(configuration.ethHttpAddress()));
 const app = express();
@@ -34,31 +38,31 @@ require("./config/socket")(io, app);
 
 app.post("/import", bodyParser.text(), (req, res) => {
   ops.importOpAsync(req.body)
-    .then( 
-      () => res.status(201).end() 
+    .then(
+    () => res.status(201).end()
     )
     .catch(
-      err => res.status(500).json({ error: err.message }) 
+    err => res.status(500).json({ error: err.message })
     );
 });
 
 app.get("/remove", (req, res) => {
   ops.removeOpAsync(req.query.kid)
     .then(
-      () => res.status(201).end() 
+    () => res.status(201).end()
     )
     .catch(
-      err => res.status(500).json({ error: err.message })
+    err => res.status(500).json({ error: err.message })
     );
 })
 
 app.get("/list", (req, res) => {
   keys.readKeySetAsync()
     .then(
-      keySet => res.status(200).json(keySet.jwk()) 
+    keySet => res.status(200).json(keySet.jwk())
     )
     .catch(
-      err => res.status(500).json({ error: err.message })
+    err => res.status(500).json({ error: err.message })
     )
 });
 
@@ -68,10 +72,10 @@ app.get("/export", (req, res) => {
 
   ops.exportOpAsync(keyFilePath, password)
     .then(
-      jwk => res.status(200).json(jwk) 
+    jwk => res.status(200).json(jwk)
     )
     .catch(
-      err => res.status(500).json({ error: err.message })
+    err => res.status(500).json({ error: err.message })
     );
 });
 
@@ -129,10 +133,54 @@ app.get("/download", (req, res) => {
   }
 });
 
-app.post("/signin", (req, res)=>{
-  res.status(200).json({
-    jwk: "jwk"
-  })
+app.post("/signin", bodyParser.urlencoded({ extended: false }), (req, res) => {
+  let { username, password } = req.body;
+  let { httpUser, session } = env;
+  let hash = crypto.createHash('sha256').update(httpUser.password).digest('hex');
+  let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  if (httpUser.username !== username || password !== hash) {
+    return res.status(404).end();
+  }
+
+  let token = jsonwebtoken.sign({ username }, session.secret, {
+    expiresIn: session.ttl
+  });
+  let data = { ip, username, token };
+  let rId = `${session.prefix}:${token}`;
+  redis.set(rId, JSON.stringify(data), (err, reply) => {
+    if (err || !!!reply) {
+      return res.status(500).end();
+    }
+    redis.expire(rId, session.ttl, (err, reply) => {
+      if (err || !!!reply) {
+        return res.status(500).end();
+      }
+      res.status(200).json({
+        jwt: token
+      });
+    });
+  });
+});
+
+app.get("/signout", (req, res) => {
+  let token = req.user.token;
+  if (!!token) {
+    let rId = `${env.session.prefix}:${token}`;
+    redis.expire(rId, 0);
+    res.status(200).end();
+  }else{
+    res.status(404).end();
+  }
+});
+
+app.all("*", (req, res, next) => {
+  next(new Error("not found"));
+});
+
+app.use((err, req, res, next) => {
+  console.log(err);
+  let status = err.status || 500;
+  return res.status(status).end();
 });
 
 io.on('connection', (socket) => {
