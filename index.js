@@ -118,19 +118,24 @@ app.get("/download", (req, res) => {
   let password = req.query.password;
   let address = req.query.address;
 
-  try {
-    keys.readKey(keyFilePath, password, key => {
+  keys.readKeyAsync(keyFilePath, password)
+    .then(key => {
       let keySet = keys.readKeySet();
       let client = new kyc.Client(web3, network, account, keySet, publicKey => {
         return secret.ecdhSecret(key, publicKey);
       });
       res.set('Content-Type', 'application/octet-stream');
-      client.downloadStream(address).pipe(res);
+      return client.downloadStream(address)
+        .pipe(res)
+        .once('error', (error) => {
+          console.log(error);
+          res.status(500).end();
+        })
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ error: err.message });
     });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: err.message });
-  }
 });
 
 app.post("/signin", bodyParser.urlencoded({ extended: false }), (req, res) => {
