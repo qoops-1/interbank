@@ -110,6 +110,30 @@ app.post("/upload", upload.single('file'), (req, res) => {
   res.status(200).json({ code: 200, isFileSyncStarted: true });
 });
 
+app.get("/card/version", (req, res) => {
+  let keyFilePath = configuration.keyFilePath();
+  let network = configuration.network();
+  let account = configuration.account();
+
+  let password = req.query.password;
+  let address = req.query.address;
+  keys.readKeyAsync(keyFilePath, password)
+    .then(key => {
+      let keySet = keys.readKeySet();
+      let client = new kyc.Client(web3, network, account, keySet, publicKey => {
+        return secret.ecdhSecret(key, publicKey);
+      });
+      return client.getSwarmHash(address)
+    })
+    .then(version => {
+      res.status(200).json({ version })
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(404).json({ version: null });
+    });
+});
+
 app.get("/download", (req, res) => {
   let keyFilePath = configuration.keyFilePath();
   let network = configuration.network();
