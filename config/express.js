@@ -46,11 +46,12 @@ module.exports = (app) => {
         };
         app.use(cors(corsOptions));
     }
+    app.disable('x-powered-by');
     let jwtCheck = jwt({
       secret: env.session.secret,
       getToken: getToken
     });
-    jwtCheck.unless = unless;   
+    jwtCheck.unless = unless;
     app.use(jwtCheck.unless({path: '/signin' }));
     app.use(jwtMiddleware().unless({path: '/signin' }));
 };
