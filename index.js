@@ -191,6 +191,12 @@ app.post("/signin", bodyParser.urlencoded({ extended: false }), (req, res) => {
   });
 });
 
+app.get("/auth/check", (req, res) => {
+  res.status(200).json({
+    jwt: true
+  });
+});
+
 app.get("/signout", (req, res) => {
   let token = req.user.token;
   if (!!token) {
@@ -207,8 +213,10 @@ app.all("*", (req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  console.log(err);
   let status = err.status || 500;
+  if(err.message === "token doesn't exists" || err.message === "token not found"){
+    status = 401;
+  }
   return res.status(status).end();
 });
 
