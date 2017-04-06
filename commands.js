@@ -7,7 +7,9 @@ const commander         = require("commander"),
 const importCommand     = require("./commands/import"),
       exportCommand     = require("./commands/export"),
       uploadCommand     = require("./commands/upload"),
-      downloadCommand   = require("./commands/download");
+      downloadCommand   = require("./commands/download"),
+      sendMoneyCommand  = require("./commands/sendMoney");
+
 
 /**
  * Read package.json
@@ -44,5 +46,11 @@ module.exports = function (args) {
         .description("Download KYC card")
         .action(downloadCommand);
 
+    parser.command("pay <key> <password> <amount> <bank>")
+        .option("-a, --address [address]", "address of the document originator")
+        .option("-N, --network [network]", "ethereum network, dev by default")
+        .description("Send money")
+        .action(sendMoneyCommand)
+    
     parser.parse(args);
 };
